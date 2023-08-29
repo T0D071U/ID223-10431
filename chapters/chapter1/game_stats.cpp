@@ -9,8 +9,8 @@ int main(){
     enum difficulty {NOVICE, EASY, NORMAL, HARD, UNBEATABLE};
     difficulty myDifficulty = EASY;
 
-    enum shipCost {FIGHTER_COST = 25, BOMBER_COST, CRUISER_COST = 50};
+    enum shipCost {FIGHTER_COST = 25, BOMBER_COST = 35, CRUISER_COST = 50};
     shipCost myShipCost = BOMBER_COST;
-    std::cout << "\nTo upgrade my ship to a Cruiser will cost " << (CRUISER_COST - myShipCost) << "Resource Points.\n";
+    std::cout << "\nTo upgrade my ship to a Cruiser will cost " << (CRUISER_COST - myShipCost) << " Resource Points.\n";
     return 0;
 } 
