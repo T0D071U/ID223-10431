@@ -4,7 +4,9 @@
 #include <iostream>
 
 int main(){
-    
 
+    while(1==1){
+        std::cout << "hi";
+    }
     return 0;
 }
