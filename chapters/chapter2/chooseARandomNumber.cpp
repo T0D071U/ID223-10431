@@ -10,6 +10,7 @@ int main() {
     const int randNumber((std::rand() % 100)+1);
 
     int playerGuess(0);
+    int playerTries(0);
 
     while(playerGuess != randNumber){
         std::cout << "Guess the number: ";
@@ -21,9 +22,10 @@ int main() {
         } else if (playerGuess < randNumber){
             std::cout << "Try to guess higher!\n\n";
         }
+        playerTries++;
     }
 
-    std::cout << "Good job! The random number was " << randNumber << "!\n";
+    std::cout << "Good job! The random number was " << randNumber << "! It only took you " << playerTries << " tries!\n";
     return 0;
 }
 
