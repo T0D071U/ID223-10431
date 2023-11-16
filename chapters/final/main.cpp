@@ -13,7 +13,7 @@ enum en_NOUNS {STORE_DOOR, MAGNET, METER, ROULETTE, MONEY, FISHROD};
 
 const int NONE = -1;
 const int DIRS = 4;
-const int ROOOMS = 11;
+const int ROOMS = 11;
 const int VERBS = 8;
 const int NOUNS = 6;
 
@@ -55,21 +55,21 @@ void set_rooms(room *rms) {
     rms[CARPARK].exits_to_room[WEST] = NONE;
 
     rms[LOBBY].description.assign("hotel lobby");
-    rms[LOBBY].exits_to_room[NORTH] = NONE;
-    rms[LOBBY].exits_to_room[EAST] = NONE;
-    rms[LOBBY].exits_to_room[SOUTH] = NONE;
-    rms[LOBBY].exits_to_room[WEST] = NONE;
+    rms[LOBBY].exits_to_room[NORTH] = CASINO;
+    rms[LOBBY].exits_to_room[EAST] = RESTAURANT;
+    rms[LOBBY].exits_to_room[SOUTH] = CORRIDOR;
+    rms[LOBBY].exits_to_room[WEST] = CARPARK;
 
     rms[RESTAURANT].description.assign("restaurant");
     rms[RESTAURANT].exits_to_room[NORTH] = NONE;
     rms[RESTAURANT].exits_to_room[EAST] = NONE;
     rms[RESTAURANT].exits_to_room[SOUTH] = NONE;
-    rms[RESTAURANT].exits_to_room[WEST] = NONE;
+    rms[RESTAURANT].exits_to_room[WEST] = LOBBY;
 
     rms[CORRIDOR].description.assign("corridor");
-    rms[CORRIDOR].exits_to_room[NORTH] = NONE;
+    rms[CORRIDOR].exits_to_room[NORTH] = LOBBY;
     rms[CORRIDOR].exits_to_room[EAST] = NONE;
-    rms[CORRIDOR].exits_to_room[SOUTH] = NONE;
+    rms[CORRIDOR].exits_to_room[SOUTH] = GARDEN;
     rms[CORRIDOR].exits_to_room[WEST] = NONE;
 
     rms[STOREROOM].description.assign("store room");
@@ -80,24 +80,24 @@ void set_rooms(room *rms) {
 
     rms[POOL].description.assign("swimming pool area");
     rms[POOL].exits_to_room[NORTH] = NONE;
-    rms[POOL].exits_to_room[EAST] = NONE;
-    rms[POOL].exits_to_room[SOUTH] = NONE;
+    rms[POOL].exits_to_room[EAST] = GARDEN;
+    rms[POOL].exits_to_room[SOUTH] = PUMPROOM;
     rms[POOL].exits_to_room[WEST] = NONE;
 
     rms[GARDEN].description.assign("tranquil garden");
-    rms[GARDEN].exits_to_room[NORTH] = NONE;
-    rms[GARDEN].exits_to_room[EAST] = NONE;
+    rms[GARDEN].exits_to_room[NORTH] = CORRIDOR;
+    rms[GARDEN].exits_to_room[EAST] = POND;
     rms[GARDEN].exits_to_room[SOUTH] = NONE;
-    rms[GARDEN].exits_to_room[WEST] = NONE;
+    rms[GARDEN].exits_to_room[WEST] = POOL;
 
     rms[POND].description.assign("patio with a fish pond");
     rms[POND].exits_to_room[NORTH] = NONE;
     rms[POND].exits_to_room[EAST] = NONE;
     rms[POND].exits_to_room[SOUTH] = NONE;
-    rms[POND].exits_to_room[WEST] = NONE;
+    rms[POND].exits_to_room[WEST] = GARDEN;
 
     rms[PUMPROOM].description.assign("damp pump room");
-    rms[PUMPROOM].exits_to_room[NORTH] = NONE;
+    rms[PUMPROOM].exits_to_room[NORTH] = POOL;
     rms[PUMPROOM].exits_to_room[EAST] = NONE;
     rms[PUMPROOM].exits_to_room[SOUTH] = NONE;
     rms[PUMPROOM].exits_to_room[WEST] = NONE;
@@ -180,7 +180,7 @@ void section_command (string Cmd, string &wd1, string &wd2) {
 
     for(i=0; i < Cmd.size(); i++) {
         if(Cmd.at(i) != search) {
-            sub_str.insert(sub_str.end(), Cmd.at(1));
+            sub_str.insert(sub_str.end(), Cmd.at(i));
         }
 
         if(i == Cmd.size() - 1) {
@@ -188,13 +188,13 @@ void section_command (string Cmd, string &wd1, string &wd2) {
             sub_str.clear();
         }
 
-        if(Cmd.at(1) == search) {
+        if(Cmd.at(i) == search) {
             words.push_back(sub_str);
             sub_str.clear();
         }
     }
 
-    for(i = words.size()-1; i> 0; i++) {
+    for(i = words.size() - 1; i > 0; i--) {
         if(words.at(i) == "") {
             words.erase(words.begin() + i);
         }
@@ -222,6 +222,139 @@ void section_command (string Cmd, string &wd1, string &wd2) {
     }
 
     if(words.size() > 2){
-        
+        cout << "Command too long. Only type one or two words " <<
+                "(direction or verb and noun)" << endl;
     }
+}
+
+void look_around (int loc, room *rms, words *dir, noun *nns) {
+    int i;
+
+    cout << "I am in a " << rms[loc].description << "." << endl;
+
+    for (i = 0; i < DIRS; i++) {
+        if (rms[loc].exits_to_room[i] != NONE) {
+            cout << "There is an exit " << dir[i].word << " to a " 
+            << rms[rms[loc].exits_to_room[i]].description << "." << endl;
+        }
+    }
+
+    for (i=0; i < NOUNS; i++) {
+        if(nns[i].location == loc) {
+            cout << "I see " << nns[i].description << "." << endl;
+        }
+    }
+}
+
+bool parser (int &loc, string wd1, string wd2, words *dir, words *vbs, room *rms, noun *nns) {
+    static bool doorIsOpen = false;
+
+    int i;
+    for(i=0; i< DIRS; i++) {
+        if(wd1 == dir[i].word) {
+            if(rms[loc].exits_to_room[dir[i].code] != NONE) {
+                loc = rms[loc].exits_to_room[dir[i].code];
+                cout << "I am now in a " << rms[loc].description << "." << endl;
+                if(loc == STOREROOM || loc == CORRIDOR) {
+                    nns[STORE_DOOR].location = loc;
+                }
+                return true;
+            } else {
+                cout << "No exit that way." << endl;
+                return true;
+            }
+        }
+    }
+
+    int VERB_ACTION = NONE;
+    int NOUN_MATCH = NONE;
+
+    for (i=0; i < VERBS; i++) {
+        if(wd1 == vbs[i].word) {
+            VERB_ACTION = vbs[i].code;
+            break;
+        }
+    }
+
+    if(wd2 != "") {
+        for (i = 0; i < NOUNS; i++){
+            if(wd2 == nns[i].word) {
+                NOUN_MATCH = nns[i].code;
+                break;
+            }
+        }
+    }
+
+    if(VERB_ACTION == NONE) {
+        cout << "No valid command entered." << endl;
+        return true;
+    }
+
+    if(VERB_ACTION == LOOK) {
+        look_around(loc, rms, dir, nns);
+        return true;
+    }
+
+    if(VERB_ACTION == OPEN){
+        if(NOUN_MATCH == STORE_DOOR){
+            if(loc == CORRIDOR || loc == STOREROOM) {
+                if(doorIsOpen == false){
+                    doorIsOpen = true;
+                    rms[CORRIDOR].exits_to_room[EAST] = STOREROOM;
+                    rms[STOREROOM].exits_to_room[WEST] = CORRIDOR;
+                    nns[STORE_DOOR].description.clear();
+                    nns[STORE_DOOR].description.assign("an open store room door");
+                    cout << "I have opened the door." << endl;
+                    return true; 
+                } else if (doorIsOpen == true) {
+                    cout << "The door is already open." << endl;
+                    return true;
+                }
+            } else {
+                cout << "There is no door to open here..." << endl;
+                return true;
+            }
+        } else {
+            cout << "Opening that is not possible." << endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    string command;
+    string word_1;
+    string word_2;
+
+    room rooms[ROOMS];
+    set_rooms(rooms);
+
+    words directions[DIRS];
+    set_directions(directions);
+
+    words verbs[VERBS];
+    set_verbs(verbs);
+
+    noun nouns[NOUNS];
+    set_nouns(nouns);
+
+    int location = CARPARK;
+
+    while(word_1 != "QUIT") {
+        command.clear();
+        cout << "What shall I do? ";
+        getline(cin, command);
+
+        word_1.clear();
+        word_2.clear();
+
+        section_command(command, word_1, word_2);
+
+        if(word_1 != "QUIT") {
+            parser(location, word_1, word_2, directions, verbs, rooms, nouns);
+        }
+        cout << endl;
+    }
+    return 0;
 }
