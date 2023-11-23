@@ -235,7 +235,7 @@ void look_around (int loc, room *rms, words *dir, noun *nns) {
     for (i = 0; i < DIRS; i++) {
         if (rms[loc].exits_to_room[i] != NONE) {
             cout << "There is an exit " << dir[i].word << " to a " 
-            << rms[rms[loc].exits_to_room[i]].description << "." << endl;
+            << rms[rms[loc].exits_to_room[i]].description << "." << endl; 
         }
     }
 
